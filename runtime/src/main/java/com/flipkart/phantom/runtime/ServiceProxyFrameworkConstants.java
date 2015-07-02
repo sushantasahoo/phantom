@@ -32,5 +32,5 @@ public class ServiceProxyFrameworkConstants {
 	public static final String SPRING_PROXY_LISTENER_CONFIG = "spring-proxy-listener-config.xml"; // files picked up from config locations
 	public static final String SPRING_PROXY_HANDLER_CONFIG = "spring-proxy-handler-config.xml"; // files picked up from config locations
 	public static final String COMMON_PROXY_HANDLER_CONFIG = "common-proxy-handler-config.xml"; // files picked up from config locations
-
+	//public static final String SPRING_PROXY_HANDLER_WRAPPER_CONFIG = "spring-proxy-handler_wrapper-config.xml";
 }

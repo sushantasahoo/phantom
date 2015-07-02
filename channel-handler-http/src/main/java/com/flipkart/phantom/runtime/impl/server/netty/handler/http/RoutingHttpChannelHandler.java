@@ -51,10 +51,12 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import com.flipkart.phantom.event.ServiceProxyEvent;
 import com.flipkart.phantom.event.ServiceProxyEventProducer;
+import com.flipkart.phantom.http.impl.ConfigService;
 import com.flipkart.phantom.http.impl.HttpProxy;
 import com.flipkart.phantom.http.impl.HttpRequestWrapper;
 import com.flipkart.phantom.task.impl.collector.EventDispatchingSpanCollector;
@@ -77,6 +79,13 @@ import com.google.common.base.Optional;
  */
 
 public abstract class RoutingHttpChannelHandler extends SimpleChannelUpstreamHandler implements InitializingBean {
+	
+	/**
+	 * Config service client
+	 */
+	@Autowired
+	ConfigService configService;
+	
 
     /** Logger for this class*/
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingHttpChannelHandler.class);
@@ -209,6 +218,9 @@ public abstract class RoutingHttpChannelHandler extends SimpleChannelUpstreamHan
         ServerRequestInterceptor<HttpRequestWrapper, HttpResponse> serverRequestInterceptor = this.initializeServerTracing(executorHttpRequest);
         
         // executor
+        //Ambika: Get latest proxy map configuation from config service client
+        this.proxyMap = configService.getProxyMap("FaultCanister");
+
         String proxy = this.proxyMap.get(this.getRoutingKey(request));
         if (proxy == null) {
             proxy = this.proxyMap.get(RoutingHttpChannelHandler.ALL_ROUTES);

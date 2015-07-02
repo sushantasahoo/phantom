@@ -17,6 +17,11 @@
 package com.flipkart.phantom.http.impl;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
+import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.message.BasicStatusLine;
 
 /**
  * A simple implementation for the HttpProxy abstract class
@@ -27,40 +32,55 @@ import org.apache.http.HttpResponse;
  */
 public class SimpleHttpProxy extends HttpProxy {
 
-    /**
-     * Abstract method implementation
-     * @see com.flipkart.phantom.http.impl.HttpProxy#fallbackRequest(HttpRequestWrapper)
-     */
-    @Override
+	/**
+	 * Abstract method implementation
+	 * 
+	 * @see com.flipkart.phantom.http.impl.HttpProxy#fallbackRequest(HttpRequestWrapper)
+	 */
+	@Override
     public HttpResponse fallbackRequest(HttpRequestWrapper requestWrapper) {
-		throw new UnsupportedOperationException("No fallback implementation found!");
+		//Sushanta: Example fall back implementation
+    	//Sushanta: Call a fallback service or show a warning page
+    	//Sushanta: Returning a dummy response for now
+    	BasicStatusLine stLine = new BasicStatusLine(new ProtocolVersion(requestWrapper.getProtocol()
+    																	,requestWrapper.getMajorVersion()
+    																	,requestWrapper.getMinorVersion())
+    												,HttpStatus.SC_REQUEST_TIMEOUT
+    												,"Enjoy coffee for sometime and come back");
+    	HttpResponse response = new BasicHttpResponse(stLine);
+    	System.out.println("Status==========="+response.getStatusLine().getStatusCode());
+    	return response;
+    	//throw new UnsupportedOperationException("No fallback implementation found!");
     }
 
-    /**
-     * Abstract method implementation
-     * @return String Group name
-     */
-    @Override
-    public String getGroupKey() {
-        return "SimpleHttpProxy";
-    }
+	/**
+	 * Abstract method implementation
+	 * 
+	 * @return String Group name
+	 */
+	@Override
+	public String getGroupKey() {
+		return "SimpleHttpProxy";
+	}
 
-    /**
-     * Abstract method implementation
-     * @return String Command name
-     */
-    @Override
-    public String getCommandKey() {
-        return this.getName() + "HttpPool";
-    }
+	/**
+	 * Abstract method implementation
+	 * 
+	 * @return String Command name
+	 */
+	@Override
+	public String getCommandKey() {
+		return this.getName() + "HttpPool";
+	}
 
-    /**
-     * Abstract method implementation
-     * @return String Thread pool name
-     */
-    @Override
-    public String getThreadPoolKey() {
-        return "SimpleHttpThreadPool";
-    }
+	/**
+	 * Abstract method implementation
+	 * 
+	 * @return String Thread pool name
+	 */
+	@Override
+	public String getThreadPoolKey() {
+		return "SimpleHttpThreadPool";
+	}
 
 }

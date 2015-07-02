@@ -19,6 +19,7 @@
         </property>
     </bean>
 
+
     <!--  ChannelHandlerPipelineFactory for TCP Server -->
     <bean id="httpChannelPipelineFactory" class="com.flipkart.phantom.runtime.impl.server.netty.ChannelHandlerPipelineFactory">
         <property name="channelHandlerBeanNamesMap">
@@ -37,10 +38,15 @@
     <bean id="httpChunkAggregator" class="org.jboss.netty.handler.codec.http.HttpChunkAggregator" scope="prototype">
         <constructor-arg value="1048576" />
     </bean>
-    <bean id="httpRequestHandler" class="com.flipkart.phantom.runtime.impl.server.netty.handler.http.HttpChannelHandler" scope="prototype">
-        <property name="defaultChannelGroup" ref="defaultChannelGroup"/>
+    <bean id="httpRequestHandler" class="com.flipkart.phantom.runtime.impl.server.netty.handler.http.MethodRoutingHttpChannelHandler" scope="prototype">
         <property name="repository" ref="httpProxyRepository"/>
         <property name="defaultProxy" value="defaultProxy" />
+		<property name="proxyMap">
+        	<map>
+            	<entry key="GET" value="listingProxy" />
+            	<entry key="POST" value="updateProxy" />
+        	</map> 
+    	</property>
         <property name="eventProducer" ref="serviceProxyEventProducer"/>
         <property name="eventDispatchingSpanCollector" ref="eventDispatchingSpanCollector"/>
         <property name="traceFilter">
@@ -48,6 +54,7 @@
 				<constructor-arg index="0" value="1"/>                
             </bean>
         </property>
+        <property name="defaultChannelGroup" ref="defaultChannelGroup"/>
     </bean>
 
     <!-- The executor repository for handling requests to HttpProxy -->
@@ -61,19 +68,6 @@
     <bean id="httpProxyRegistry" class="com.flipkart.phantom.http.impl.registry.HttpProxyRegistry" />
 
     <!-- Task Handler Event Publishers & Consumers-->
-
-    <!--Types of subscriptions supported -->
-    <bean id="applicationEventMulticaster" class="org.trpr.platform.core.impl.event.PlatformEventMulticaster">
-        <property name="subscriptions">
-            <list>
-                <value>evt://com.flipkart.phantom.events.COMMAND_HANDLER</value>
-                <value>evt://com.flipkart.phantom.events.THRIFT_HANDLER</value>
-                <value>evt://com.flipkart.phantom.events.HTTP_HANDLER</value>
-                <value>evt://com.flipkart.phantom.events.ASYNC_COMMAND_HANDLER</value>
-                <value>evt://com.flipkart.phantom.events.TRACING_COLLECTOR</value>
-            </list>
-        </property>
-    </bean>
 
     <!--This event producer bean is declared primarily for using in ServiceProxyEvent Producer-->
     <bean id="endpointEventProducer" class="org.trpr.platform.core.impl.event.EndpointEventProducerImpl">
@@ -90,30 +84,14 @@
     <bean id="errorRequestLogger" class="com.flipkart.phantom.event.consumer.RequestLogger">
         <property name="subscriptions">
             <list>
-                <value>evt://com.flipkart.phantom.events.COMMAND_HANDLER</value>
+                <value>evt://com.flipkart.phantom.events.TASK_HANDLER</value>
                 <value>evt://com.flipkart.phantom.events.THRIFT_HANDLER</value>
                 <value>evt://com.flipkart.phantom.events.HTTP_HANDLER</value>
+                <value>evt://com.flipkart.phantom.events.COMMAND_HANDLER</value>
                 <value>evt://com.flipkart.phantom.events.ASYNC_COMMAND_HANDLER</value>
-                <value>evt://com.flipkart.phantom.events.TRACING_COLLECTOR</value>
             </list>
         </property>
     </bean>
-    <!-- Enable this bean only when distributed tracing is needed
-    <bean id="zipkinCollector" class="com.flipkart.phantom.event.consumer.PushToZipkinEventConsumer">
-        <property name="requestLogger" ref="commonRequestLogger"/>
-        <property name="zipkinSpanCollector">
-            <bean class="com.github.kristofa.brave.zipkin.ZipkinSpanCollector">
-				<constructor-arg index="0" value="localhost"/>
-      			<constructor-arg index="1" value="9410"/>                
-            </bean>
-        </property>
-        <property name="subscriptions">
-            <list>
-                <value>evt://com.flipkart.phantom.events.TRACING_COLLECTOR</value>
-            </list>
-        </property>
-    </bean>
-    -->
     <!-- Task Handler Event Publishers & Consumers-->
 
 </beans>

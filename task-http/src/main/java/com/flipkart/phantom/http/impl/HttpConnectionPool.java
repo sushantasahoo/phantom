@@ -31,6 +31,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,9 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  */
 public class HttpConnectionPool {
+	
+	@Autowired
+	ConfigService configService;
 
     /** Default settings for forwarding Http headers*/
     public static final boolean FORWARD_HEADERS = false;
@@ -97,11 +101,59 @@ public class HttpConnectionPool {
     private boolean forwardHeaders = HttpConnectionPool.FORWARD_HEADERS;
 
     /**
+     * Ambika: Anonymous inner class for intermittent polling to external config service
+     */
+    private class ConfigPoller implements Runnable{
+    	
+    	private int configVersion;
+
+		@Override
+		public void run() {
+			//Poll external config service to check config version every 30 seconds
+			try {
+				while(configVersion < configService.getConfigVersion("FaultCanister")){
+					//if new configuration found, reinitialize connection pool
+					initConnectionPool();
+				}
+			} catch (ConfigServiceException e) {
+				//Log error and retry after 30 seconds
+				//Logger.warn("Could not connect to config service at time:"+ System.currentTimeMillis());
+			}
+			//Sleep for 30 seconds before polling again
+			try {
+				Thread.sleep(30000);
+			} catch (InterruptedException e) {
+				//Log error
+				//Logger.warn("Thread inturrupted, may cause early config change");
+			}
+			run();
+			
+		}
+    	
+    	
+    	
+    }
+    
+    
+    /**
      * Initialize the connection pool
      */
     public void initConnectionPool() {
 
         // max concurrent requests = max connections + request queue size
+    	//Ambika: get values from config service client
+    	try {
+			requestQueueSize = configService.getRequestQueueSize("FaultCanister");
+		} catch (ConfigServiceException e) {
+			// if exception, use default values, just logging error here
+			//Logger.warn("Could not retrieve config values", e);
+		}
+    	try {
+			maxConnections = configService.getMaxConnections("FaultCanister");
+		} catch (ConfigServiceException e) {
+			// if exception, use default values, just logging error here
+			//Logger.warn("Could not retrieve config values", e);
+		}
         this.processQueue = new Semaphore(requestQueueSize + maxConnections);
 
         // create scheme

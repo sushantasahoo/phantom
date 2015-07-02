@@ -48,12 +48,19 @@
         	</map> 
     	</property>
         <property name="eventProducer" ref="serviceProxyEventProducer"/>
+        <property name="eventDispatchingSpanCollector" ref="eventDispatchingSpanCollector"/>
+        <property name="traceFilter">
+            <bean class="com.github.kristofa.brave.FixedSampleRateTraceFilter">
+				<constructor-arg index="0" value="1"/>                
+            </bean>
+        </property>
     </bean>
 
     <!-- The executor repository for handling requests to HttpProxy -->
     <bean id="httpProxyRepository" class="com.flipkart.phantom.http.impl.HttpProxyExecutorRepository">
         <property name="taskContext" ref="taskContext" />
         <property name="registry" ref="httpProxyRegistry" />
+        <property name="eventDispatchingSpanCollector" ref="eventDispatchingSpanCollector"/>
     </bean>
 
     <!-- the registry of HttpProxies -->

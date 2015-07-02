@@ -42,6 +42,17 @@ public class HttpProxyExecutorRepository extends AbstractExecutorRepository<Http
      */
     public Executor<HttpRequestWrapper,HttpResponse> getExecutor (String commandName, String proxyName, HttpRequestWrapper requestWrapper)  {
         HttpProxy proxy = (HttpProxy) registry.getHandler(proxyName);
+        //Sushant: Don't be impatient to throw the exception, let it have some time to initialize
+        while(!proxy.isActive()){
+        	try {
+				Thread.sleep(1000);
+				break;
+			} catch (InterruptedException e) {
+				if(!proxy.isActive())
+				continue;
+				else break;
+			}
+        }
         if (proxy.isActive()) {
         	HttpProxyExecutor executor = new HttpProxyExecutor(proxy, this.taskContext, requestWrapper);
             return this.wrapExecutorWithInterceptors(executor,proxy);
