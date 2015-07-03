@@ -39,7 +39,8 @@ public class ConfigServiceImpl implements ConfigService {
 		// try{
 		// requestQueueSize = getExtConfigValue(configKey);
 		// }catch (Exception e){
-		// throw new ConfigServiceException("SomeCode", e.getMessage());
+		//This is a anti-pattern, clicking on the debug trace in console will only lead to this line, not where the actual error is being thrown
+		// throw new ConfigServiceException("SomeCode", e);
 		// }
 		return requestQueueSize;
 	}

@@ -1,5 +1,11 @@
 package com.flipkart.phantom.http.impl;
 
+/**
+ * Exception class wraps all service exceptions as enclosing classes just have to handle this exception
+ * 
+ * @author sushantasahoo1
+ *
+ */
 public class ConfigServiceException extends Exception {
 
 	/**

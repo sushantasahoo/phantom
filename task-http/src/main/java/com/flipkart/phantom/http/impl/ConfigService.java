@@ -4,6 +4,9 @@ import java.util.Map;
 
 public interface ConfigService {
 	
+	//TODO: Code in such a way that developers can debug easily so provide as much info about the exception as possible
+	public static final String CONFIG_SERVER_NOT_REACHABLE = "Config.Service.Host.Unreachable";
+	
 	/**
 	 * Get config version from external configuration service
 	 * @return int config version

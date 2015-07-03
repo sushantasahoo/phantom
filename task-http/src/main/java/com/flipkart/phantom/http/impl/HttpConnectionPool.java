@@ -60,6 +60,8 @@ public class HttpConnectionPool {
     static {
         HttpConnectionPool.REMOVE_HEADERS.add(HTTP.CONTENT_LEN);
     }
+    
+    private ConfigPoller configPoller = new ConfigPoller();
 
     /** logger */
     private static Logger logger = LoggerFactory.getLogger(HttpConnectionPool.class);
@@ -100,14 +102,20 @@ public class HttpConnectionPool {
     /** Setting for forwarding Http headers*/
     private boolean forwardHeaders = HttpConnectionPool.FORWARD_HEADERS;
 
-    /**
+    
+    
+    public HttpConnectionPool() {
+    	configPoller.run();
+	}
+
+	/**
      * Ambika: Anonymous inner class for intermittent polling to external config service
      */
     private class ConfigPoller implements Runnable{
     	
     	private int configVersion;
-
-		@Override
+    	
+    	@Override
 		public void run() {
 			//Poll external config service to check config version every 30 seconds
 			try {
@@ -136,9 +144,10 @@ public class HttpConnectionPool {
     
     
     /**
+     * TODO: Explain synchronized
      * Initialize the connection pool
      */
-    public void initConnectionPool() {
+    public synchronized void initConnectionPool() {
 
         // max concurrent requests = max connections + request queue size
     	//Ambika: get values from config service client
